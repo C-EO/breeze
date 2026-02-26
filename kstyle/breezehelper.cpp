@@ -26,6 +26,7 @@
 #include <QMenuBar>
 #include <QPainter>
 #include <QStyleOption>
+#include <QTreeView>
 #include <QWindow>
 
 #include <QDialog>
@@ -1796,6 +1797,7 @@ QMargins Helper::itemViewItemMargins(const QStyleOptionViewItem *option) const
     }
 
     const QFrame *frame = qobject_cast<const QFrame *>(option->widget);
+    const QAbstractItemView *abstractItemView = qobject_cast<const QAbstractItemView *>(option->widget);
 
     const bool isFirst = option->index.row() == 0;
     const bool hasFrame = frame && frame->frameShape() == QFrame::StyledPanel;
@@ -1810,7 +1812,12 @@ QMargins Helper::itemViewItemMargins(const QStyleOptionViewItem *option) const
         margins -= {1, isFirst ? 1 : 0, 1, 0};
     }
 
-    // TODO: fix RTL
+    // If a treeview wants to show the highlight separate for each column, always draw rounded borders
+    // if (tree && !tree->allColumnsShowFocus()) {
+    if (abstractItemView && abstractItemView->selectionBehavior() != QAbstractItemView::SelectRows) {
+        return margins;
+    }
+
     if ((reverse && option->viewItemPosition == QStyleOptionViewItem::End) || (!reverse && option->viewItemPosition == QStyleOptionViewItem::Beginning)
         || option->viewItemPosition == QStyleOptionViewItem::Middle) {
         margins.setRight(0);
